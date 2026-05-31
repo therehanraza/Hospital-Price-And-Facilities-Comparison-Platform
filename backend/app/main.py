@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 from app.config.settings import get_settings
 from app.middleware.error_handler import app_error_handler
@@ -43,3 +43,8 @@ app.include_router(seed_routes.router)
 @app.get("/")
 async def root():
     return {"success": True, "message": "Hospital comparison API is running", "docs": "/docs"}
+
+
+@app.head("/")
+async def root_head():
+    return Response(status_code=200)
