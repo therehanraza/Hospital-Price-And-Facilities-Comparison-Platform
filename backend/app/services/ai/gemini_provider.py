@@ -1,14 +1,29 @@
 import json
-from google import genai
+import warnings
 from app.config.settings import get_settings
 
 settings = get_settings()
 
 
+def create_gemini_client():
+    # Import lazily so the free demo can boot cleanly when Gemini is not configured.
+    with warnings.catch_warnings():
+        try:
+            from pydantic.warnings import ArbitraryTypeWarning
+
+            warnings.filterwarnings("ignore", category=ArbitraryTypeWarning)
+        except Exception:
+            pass
+
+        from google import genai
+
+    return genai.Client(api_key=settings.gemini_api_key)
+
+
 async def generate_json(prompt: str, schema_hint: str) -> tuple[dict | None, str | None]:
     if not settings.gemini_api_key:
         return None, None
-    client = genai.Client(api_key=settings.gemini_api_key)
+    client = create_gemini_client()
     safe_prompt = (
         "Return only valid JSON. Do not provide diagnosis, treatment, emergency advice, medicine advice, or medical guarantees. "
         "This is hospital discovery and estimated price/facility comparison only.\n"
